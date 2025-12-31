@@ -1,8 +1,11 @@
 export interface Blog {
   id: number;
+  user_id?: string;
   title: string;
   content: string;
   created_at: string;
+  // Helper for lazy loading count
+  recaps?: { count: number }[];
 }
 
 export interface Recap {
@@ -14,7 +17,7 @@ export interface Recap {
 }
 
 export interface RecapWithBlog extends Recap {
-  blogs: Blog | null; // Joined data from Supabase
+  blogs: Blog | null; 
 }
 
 export enum ViewState {

@@ -1,13 +1,33 @@
-import React, { useState } from 'react';
-import { PenTool, Layers } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { PenTool, Layers, LogOut } from 'lucide-react';
+import { supabase } from './services/supabase';
+import { signOut } from './services/db';
 import { BlogEditor } from './components/BlogEditor';
 import { RecapList } from './components/RecapList';
 import { BlogReader } from './components/BlogReader';
+import { Auth } from './components/Auth';
 import { ViewState } from './types';
 
 function App() {
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState<ViewState>(ViewState.WRITE);
   const [selectedBlogId, setSelectedBlogId] = useState<number | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleReadBlog = (id: number) => {
     setSelectedBlogId(id);
@@ -32,6 +52,14 @@ function App() {
     }
   };
 
+  if (loading) {
+    return <div className="h-screen w-full flex items-center justify-center bg-slate-50 text-gray-400">Loading...</div>;
+  }
+
+  if (!session) {
+    return <Auth />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col font-sans text-gray-900">
       {/* Header */}
@@ -44,7 +72,7 @@ function App() {
               </span>
             </div>
             
-            <nav className="flex space-x-2">
+            <nav className="flex items-center space-x-2">
               <button
                 onClick={() => setCurrentView(ViewState.WRITE)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center ${
@@ -66,6 +94,16 @@ function App() {
               >
                 <Layers className="w-4 h-4 mr-2" />
                 Recap
+              </button>
+              
+              <div className="h-6 w-px bg-gray-200 mx-2"></div>
+              
+              <button
+                onClick={() => signOut()}
+                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
               </button>
             </nav>
           </div>

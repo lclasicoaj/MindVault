@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Eye, Repeat, CheckCircle } from 'lucide-react';
-import { RecapWithBlog } from '../types';
+import { Recap } from '../types';
 import { Button } from './Button';
 
 interface FlashcardCarouselProps {
-  items: RecapWithBlog[];
+  items: Recap[]; // Changed from RecapWithBlog[] to Recap[] to support decoupled fetching
   chapterTitle: string;
 }
 
